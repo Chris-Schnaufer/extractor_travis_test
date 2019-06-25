@@ -36,7 +36,7 @@ stages:
 matrix:
   include:
     - name: "OpenDroneMap Extractor"
-      env: EXTRACTOR_BRANCH=opendronemap TEST_SOURCE_ARCHIVE=odm_test_data.tar TEST_COMPARE_ARCHIVE=odm_results.tar EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:opendronemap
+      env: EXTRACTOR_BRANCH=opendronemap TEST_SOURCE_ARCHIVE=odm_test_data.tar TEST_COMPARE_ARCHIVE=odm_results.tar EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:opendronemap RESULT_DATASET_NAME=
       if: branch = master OR branch = develop OR branch =~ /.*opendronemap.*/ OR branch =~ /.*odm.*/ OR branch =~ /.*travis.*/
     #- name: "Clip By Shape Extractor"
     #  env: EXTRACTOR_BRANCH=clipbyshape
@@ -144,12 +144,13 @@ script:
   - docker exec -t clowder_rabbitmq_1 /opt/rabbitmq/escript/rabbitmq-diagnostics list_queues
   - echo "Waiting for extractor to finish and setting up for test result validation"
   - ./test/wait_for_finish.py "$CONTAINER_NAME"
-  - ./test/extract_results.py  "$TEST_DATASET_NAME"      # get the results
+  - ./test/extract_results.py  "$RESULT_DATASET_NAME"      # get the results
   - ./test/setup_comparables.sh "test/$TEST_COMPARE_ARCHIVE"  # setup any comparables
   - echo "Running the validation of extractor produced data"
   - ls -la
   - ls -la ./datasets
   - ls -la "./datasets/$TEST_DATASET_NAME"
+  - ls -la "./datasets/$RESULT_DATASET_NAME"
   - ls -la ./compare
   - ./test/validate_results.py      # verify the results
 
