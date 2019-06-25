@@ -132,7 +132,7 @@ before_script:
   - cat ./data/experiment.yaml
   - ./test/upload_data.py                     # Put the files into clowder
   - echo "Registering the extractor and waiting for it to start"
-  - ./test/register_extractor.py ./extractor_info.json
+  - ./test/register_extractor.py $BUILD_FOLDER/extractor_info.json
   - ./test/wait_for_started.py "$CONTAINER_NAME"
 
 # Start the extraction process and get a result
