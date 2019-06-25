@@ -114,7 +114,7 @@ install:
 # Setup the clowder environment
 before_script:
   - echo "Setting up Clowder spaces and datasets"
-  - export SPACE_ID=`curl -X POST -v -H "accept:application/json" -H "Content-Type:application/json" -d "{\"name\":\"$TEST_SPACE_NAME\",\"description\":\"Test results\"}"" "$CLOWDER_HOST_URI/api/spaces?key=$API_KEY" | sed -r 's/.*id\"\:\"(.+)\".*/\1/'`
+  - export SPACE_ID=`curl -X POST -v -H "accept:application/json" -H "Content-Type:application/json" -d "{\"name\":\"$TEST_SPACE_NAME\",\"description\":\"Test results\"}" "$CLOWDER_HOST_URI/api/spaces?key=$API_KEY" | sed -r 's/.*id\"\:\"(.+)\".*/\1/'`
   - echo "SPACE_ID:\ $SPACE_ID"
   - export DATASET_ID=`curl -X POST -v -H "accept:application/json" -H "Content-Type:application/json" -d "{\"name\":\"$TEST_DATASET_NAME\"}" "$CLOWDER_HOST_URI/api/datasets/createempty?key=$API_KEY" | sed -r 's/.*id\"\:\"(.+)\".*/\1/'`
   - echo "DATASET ID:\ $DATASET_ID"
