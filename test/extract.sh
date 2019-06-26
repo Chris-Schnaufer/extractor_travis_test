@@ -8,11 +8,11 @@ FOLDER_NAME="$2"
 # Check parameters
 if [[ -z "${TAR_FILENAME}" ]]; then
     echo "Missing first parameter of tar filename"
-    exit(1)
+    exit 1
 fi
 if [[ -z "${FOLDER_NAME}" ]]; then
     echo "Missing second parameter of destination folder"
-    exit(1)
+    exit 1
 fi
 
 # Make the folder for the files
@@ -21,15 +21,15 @@ mkdir "${FOLDER_NAME}"
 # Check if we are pulling the file from somewhere
 if [[ "${TAR_FILENAME}" =~ ^gdrive:* ]]; then
     # We expect the format to be "gdrive:<## file id ##>/<## file name ##>"
-    FILEID=`[[ "${TEST_SOURCE_ARCHIVE}" =~ :(.*)\/ ]] && echo "${BASH_REMATCH[1]}"`
-    TAR_FILENAME=`[[ "${TEST_SOURCE_ARCHIVE}" =~ \/(.*)$ ]] && echo "${BASH_REMATCH[1]}"`
+    FILEID=`[[ "${TAR_FILENAME}" =~ :(.*)\/ ]] && echo "${BASH_REMATCH[1]}"`
+    TAR_FILENAME=`[[ "${TAR_FILENAME}" =~ \/(.*)$ ]] && echo "${BASH_REMATCH[1]}"`
     if [[ -z "${FILEID}" ]]; then
         echo "Missing a file identifier"
-        exit(1)
+        exit 1
     fi
     if [[ -z "${TAR_FILENAME}" ]]; then
         echo "Missing a file name"
-        exit(1)
+        exit 1
     fi
     curl -c ./cookie -s -L "https://drive.google.com/uc?export=download&id=${FILEID}" > /dev/null
     curl -Lb ./cookie "https://drive.google.com/uc?export=download&confirm=`awk '/download/ {print $NF}' ./cookie`&id=${FILEID}" -o "${TAR_FILENAME}"

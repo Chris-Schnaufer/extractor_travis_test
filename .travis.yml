@@ -36,10 +36,10 @@ stages:
 matrix:
   include:
     - name: "OpenDroneMap Extractor"
-      env: EXTRACTOR_BRANCH=opendronemap TEST_SOURCE_ARCHIVE=test/odm_test_data.tar TEST_COMPARE_ARCHIVE=odm_results.tar EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:opendronemap RESULT_DATASET_NAME= RESULT_DATASET_FILE_MATCH=rgb_.tif,thumb.tif,10pct.tif,10pct.png,.laz,shp_.shp,shp_.dbf,shp_.prj,shp_.shx,shp_.txt
+      env: EXTRACTOR_BRANCH=opendronemap TEST_SOURCE_ARCHIVE=test/odm_test_data.tar TEST_COMPARE_ARCHIVE=test/odm_results.tar EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:opendronemap RESULT_DATASET_NAME= RESULT_DATASET_FILE_MATCH=rgb_.tif,thumb.tif,10pct.tif,10pct.png,.laz,shp_.shp,shp_.dbf,shp_.prj,shp_.shx,shp_.txt
       if: branch = master OR branch = develop OR branch =~ /.*opendronemap.*/ OR branch =~ /.*odm.*/ OR branch =~ /.*travis.*/
     - name: "Clip By Shape Extractor"
-      env: EXTRACTOR_BRANCH=clipbyshape TEST_SOURCE_ARCHIVE=gdrive:1_kYL1gSb1wmiokIYN3dgU8baVPS01R9K/clipbyshape_test_data.tar TEST_COMPARE_ARCHIVE=clipbyshape_results.tar EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:clipbyshape RESULT_DATASET_NAME= RESULT_DATASET_FILE_MATCH=
+      env: EXTRACTOR_BRANCH=clipbyshape TEST_SOURCE_ARCHIVE=gdrive:1_kYL1gSb1wmiokIYN3dgU8baVPS01R9K/clipbyshape_test_data.tar TEST_COMPARE_ARCHIVE=gdrive:1eCQhlNtMlKqB73REmbrSAWE4pDDXO9IM/clipbyshape_results.tar EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:clipbyshape RESULT_DATASET_NAME= RESULT_DATASET_FILE_MATCH=
       if: branch = master OR branch = develop OR branch =~ /.*clipbyshape.*/ OR branch =~ /.*travis.*/
     #- name: "Canopy Cover Value Extractor"
     #  env: EXTRACTOR_BRANCH=canopycover
@@ -144,7 +144,7 @@ script:
   - echo "Waiting for extractor to finish and setting up for test result validation"
   - ./test/wait_for_finish.py "$CONTAINER_NAME"
   - ./test/extract_results.py  "$RESULT_DATASET_NAME"      # get the results
-  - ./test/setup_comparables.sh "test/$TEST_COMPARE_ARCHIVE"  # setup any comparables
+  - ./test/extract.sh "$TEST_COMPARE_ARCHIVE" compare  # setup any comparables
   - echo "Running the validation of extractor produced data"
   - ls -la
   - ls -la ./datasets
