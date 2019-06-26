@@ -36,19 +36,23 @@ stages:
 matrix:
   include:
     - name: "OpenDroneMap Extractor"
-      env: EXTRACTOR_BRANCH=opendronemap TEST_SOURCE_ARCHIVE=odm_test_data.tar TEST_COMPARE_ARCHIVE=odm_results.tar EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:opendronemap RESULT_DATASET_NAME=
+      env: EXTRACTOR_BRANCH=opendronemap TEST_SOURCE_ARCHIVE=odm_test_data.tar TEST_COMPARE_ARCHIVE=odm_results.tar EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:opendronemap RESULT_DATASET_NAME= RESULT_DATASET_FILE_MATCH=rgb_.tif,thumb.tif,10pct.tif,10pct.png,.laz,shp_.shp,shp_.dbf,shp_.prj,shp_.shx,shp_.txt
       if: branch = master OR branch = develop OR branch =~ /.*opendronemap.*/ OR branch =~ /.*odm.*/ OR branch =~ /.*travis.*/
     #- name: "Clip By Shape Extractor"
     #  env: EXTRACTOR_BRANCH=clipbyshape
     #  env: TEST_SOURCE_ARCHIVE=clipbyshape_test_data.tar
     #  env: TEST_COMPARE_ARCHIVE=clipbyshape_results.tar
     #  env: EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:clipbyshape
+    #  env: RESULT_DATASET_NAME=
+    #  env: RESULT_DATASET_FILE_MATCH=
     #  if: branch = master OR branch = develop OR branch =~ /.*clipbyshape.*/ OR branch =~ /.*travis.*/
     #- name: "Canopy Cover Value Extractor"
     #  env: EXTRACTOR_BRANCH=canopycover
     #  env: TEST_SOURCE_ARCHIVE=canopycover_test_data.tar
     #  env: TEST_COMPARE_ARCHIVE=canopycover_results.tar
     #  env: EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:canopycover
+    #  env: RESULT_DATASET_NAME=
+    #  env: RESULT_DATASET_FILE_MATCH=
     #  if: branch = master OR branch = develop OR branch =~ /.*canopycover.*/ OR branch =~ /.*travis.*/
 
 # Secure stuff: travis encrypt --com '<var>=<value>'
@@ -152,7 +156,7 @@ script:
   - ls -la "./datasets/$TEST_DATASET_NAME"
   - ls -la "./datasets/$RESULT_DATASET_NAME"
   - ls -la ./compare
-  - ./test/validate_results.py      # verify the results
+  - ./test/validate_results.py  "$RESULT_DATASET_FILE_MATCH"    # verify the results
 
 after_script:
   - echo "Deploying container after successful run"
