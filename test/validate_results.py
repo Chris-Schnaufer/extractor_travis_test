@@ -32,11 +32,11 @@ argc = len(sys.argv)
 if argc <= 1:
     raise RuntimeError("Missing filename match strings parameter")
 if ',' in sys.argv[1]:
-    file_endings = ()
+    file_endings = []
     for ending in sys.argv[1].split(','):
         file_endings.append(ending.strip())
 else:
-    file_endings = (sys.argv[1].strip())
+    file_endings = [sys.argv[1].strip()]
 
 def find_file_match(folder, end):
     """Locates a file in the specified folder that has the matching ending.
