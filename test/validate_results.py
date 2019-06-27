@@ -190,6 +190,7 @@ for one_end in file_endings:
 
         # Check the image attributes
         if not im_mas.shape == im_src.shape:
+            print("Mismatched image dimensions: (" + str(im_mas.shape) + ") vs (" + im_src.shape + ")")
             failures['image dimensions'] = True
 
         if 'image dimensions' not in failures:
