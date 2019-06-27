@@ -113,9 +113,9 @@ def find_filtered_folders(folder, regex_filter=None):
             if not regex_filter is None:
                 match = re.search(regex_filter, full_name)
                 if not match is None:
-                    found.append(full_name)
+                    found.append(name)
             else:
-                found.append(full_name)
+                found.append(name)
 
     found_len = len(found)
     return found if not found_len <= 0 else None
@@ -166,7 +166,7 @@ for one_end in file_endings:
             continue
 
         # Check file types
-        ext = os.path.splitext(master)
+        _, ext = os.path.splitext(master)
         if not ext:
             print("Success compare extension-less files (" + one_end + "): " + source + " vs " + master)
             continue
