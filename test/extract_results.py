@@ -50,10 +50,10 @@ for ds in datasets:
 
         # Download and store each file in the dataset under the dataset name
         files = res.json()
-        print("Dataset files: " + str(files))
+        #print("Dataset files: " + str(files))
         ds_files = []
         for fn in files:
-            print("Fetching file: " + fn['filename'])
+            print("    Fetching file: " + fn['filename'])
             url = "%s/files/%s?%s" % (API_BASE, fn['id'], KEY_PARAM)
             res = requests.get(url, stream=True)
             res.raise_for_status()
@@ -72,4 +72,4 @@ for ds in datasets:
             ds_files.append(dest)
         return_ds[ds['name']] = ds_files
 
-print(json.dumps(return_ds))
+#print(json.dumps(return_ds))

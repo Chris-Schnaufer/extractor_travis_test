@@ -144,9 +144,6 @@ for one_end in file_endings:
         match_folder = datasets_folder if sub_folder is None else os.path.join(datasets_folder, sub_folder)
         source = find_file_match(match_folder, one_end)
 
-        print("Master file: " + str(master))
-        print("Source file: " + str(source))
-
         if master is None:
             raise RuntimeError("Missing the comparison files used to validate results: " + str(one_end))
         if source is None:
@@ -162,17 +159,17 @@ for one_end in file_endings:
             if not diff == 0 and float(diff)/float(master_size) > FILE_SIZE_MAX_DIFF_FRACTION:
                 raise RuntimeError("File size difference exceeds limit of " + FILE_SIZE_MAX_DIFF_FRACTION + ": " + source + " vs " + master)
         if master_size == 0 or source_size == 0:
-            print("Success compare empty files (" + one_end + "): " + source + " vs " + master)
+            print("Success compare empty files (" + one_end + "): " + source + " and " + master)
             continue
 
         # Check file types
         _, ext = os.path.splitext(master)
         if not ext:
-            print("Success compare extension-less files (" + one_end + "): " + source + " vs " + master)
+            print("Success compare extension-less files (" + one_end + "): " + source + " and " + master)
             continue
 
         if not (ext == ".tif" or ext == "png"):
-            print("Success. No futher tests for files (" + one_end + "): " + source + " vs " + master)
+            print("Success. No futher tests for files (" + one_end + "): " + source + " and " + master)
             continue
 
         im_mas = cv2.imread(master)
@@ -207,8 +204,10 @@ for one_end in file_endings:
         # Report any errors back
         failures_len = len(failures)
         if failures_len > 0:
-            print("We have " + str(failures_len) + "errors detected for files (" + one_end + "): " + source + " vs " + master)
+            print("We have " + str(failures_len) + " errors detected for files (" + one_end + "): " + source + " vs " + master)
             errs = ', '.join(str(k) for k in failures.keys())
             raise RuntimeError("Errors found: %s" % errs)
+
+        print("Success compare image files (" + one_end + "): " + source + " and " + master)
 
 print("Test has run successfully")

@@ -149,7 +149,6 @@ script:
   - echo "Running the validation of extractor produced data"
   - ls -la
   - ls -la ./datasets
-  - ls -la "./datasets/$TEST_DATASET_NAME"
   - ls -la "./datasets/$RESULT_DATASET_NAME"
   - ls -la ./compare
   - ./test/validate_results.py  "$RESULT_DATASET_FILE_MATCH" "$RESULT_DATASET_FILTER"    # verify the results
