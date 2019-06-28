@@ -36,7 +36,7 @@ stages:
 matrix:
   include:
     - name: "OpenDroneMap Extractor"
-      env: EXTRACTOR_BRANCH=opendronemap TEST_SOURCE_ARCHIVE=test/odm_test_data.tar TEST_COMPARE_ARCHIVE=test/odm_results.tar EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:opendronemap RESULT_DATASET_NAME= RESULT_DATASET_FILE_MATCH=rgb_.tif,thumb.tif,10pct.tif,10pct.png,.laz,shp_.shp,shp_.dbf,shp_.prj,shp_.shx,shp_.txt RESULT_DATASET_FILTER= VALIDATION_PARAMS="-pixdiff=30"
+      env: EXTRACTOR_BRANCH=opendronemap TEST_SOURCE_ARCHIVE=test/odm_test_data.tar TEST_COMPARE_ARCHIVE=test/odm_results.tar EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:opendronemap RESULT_DATASET_NAME= RESULT_DATASET_FILE_MATCH=rgb_.tif,thumb.tif,10pct.tif,10pct.png,.laz,shp_.shp,shp_.dbf,shp_.prj,shp_.shx,shp_.txt RESULT_DATASET_FILTER= VALIDATION_PARAMS="-pixdiff=60"
       if: branch = master OR branch = develop OR branch =~ /.*opendronemap.*/ OR branch =~ /.*odm.*/ OR branch =~ /.*travis.*/
     - name: "Clip By Shape Extractor"
       env: EXTRACTOR_BRANCH=clipbyshape TEST_SOURCE_ARCHIVE=gdrive:1_kYL1gSb1wmiokIYN3dgU8baVPS01R9K/clipbyshape_test_data.tar TEST_COMPARE_ARCHIVE=gdrive:1eCQhlNtMlKqB73REmbrSAWE4pDDXO9IM/clipbyshape_results.tar EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:clipbyshape RESULT_DATASET_NAME= RESULT_DATASET_FILE_MATCH=.tif RESULT_DATASET_FILTER="- (.+?) -" VALIDATION_PARAMS=
@@ -108,6 +108,7 @@ install:
   - curl -X POST -H "Content-Type:application/x-www-form-urlencoded" "$CLOWDER_HOST_URI/authenticate/userpass?username=$TEST_CLOWDER_USERNAME&password=$TEST_CLOWDER_PASSWORD" -D headers.txt
   - USER_ID=`grep 'Set-Cookie:\ id' headers.txt | sed -r 's/Set-(.+);.*;.*/\1/'`
   - echo "USER ID:\ $USER_ID"
+  - sleep 5
   - export API_KEY=`curl -X POST -v -H "Content-Type:application/x-www-form-urlencoded" "$CLOWDER_HOST_URI/api/users/keys?name=testingkey" -H "$USER_ID" | sed -r 's/.*"key":"(.+)".*/\1/'`
   - echo "API KEY:\ $API_KEY"
 
