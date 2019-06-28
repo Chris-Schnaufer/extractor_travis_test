@@ -52,7 +52,7 @@ if [[ ! -f "./${TAR_FILENAME}" ]]; then
         fi
     done
 fi
-tar -xv -f "${TAR_FILENAME}"
+tar -x -f "${TAR_FILENAME}"
 
 # Remove the tar file copy
 rm "${TAR_FILENAME}"

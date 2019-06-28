@@ -24,6 +24,9 @@ from terrautils.spatial import clip_raster
 from terrautils.imagefile import file_is_image_type, image_get_geobounds, polygon_to_tuples, \
      polygon_to_tuples_transform, get_epsg
 
+# The maximum number of records within metadata to upload to a dataset
+MAX_DATASET_METADATA = 1000
+
 # We need to add other sensor types for OpenDroneMap generated files before anything happens
 # The Sensor() class initialization defaults the sensor dictionary and we can't override
 # without many code changes
@@ -476,14 +479,21 @@ class ClipByShape(TerrarefExtractor):
             # Tell Clowder this is completed so subsequent file updates don't daisy-chain
             id_len = len(uploaded_file_ids)
             if id_len > 0 or self.created > 0:
+                clowder_dataset.remove_metadata(connector, host, secret_key, resource['id'],
+                                                self.extractor_info['name'])
+
+                metadata_file_ids = uploaded_file_ids
+                num_rec = len(metadata_file_ids)
+                if num_rec > MAX_DATASET_METADATA:
+                    metadata_file_ids = metadata_file_ids[:MAX_DATASET_METADATA]
+                    metadata_file_ids.append("Additional %s file IDs not listed" % (num_rec - MAX_DATASET_METADATA))
+
                 extractor_md = build_metadata(host, self.extractor_info, resource['id'], {
-                    "files_created": uploaded_file_ids
+                    "files_created": metadata_file_ids
                 }, 'dataset')
                 self.log_info(resource,
                               "Uploading shapefile plot extractor metadata to Level_2 dataset: "
                               + str(extractor_md))
-                clowder_dataset.remove_metadata(connector, host, secret_key, resource['id'],
-                                                self.extractor_info['name'])
                 clowder_dataset.upload_metadata(connector, host, secret_key, resource['id'],
                                                 extractor_md)
             else:
