@@ -25,7 +25,7 @@ from terrautils.imagefile import file_is_image_type, image_get_geobounds, polygo
      polygon_to_tuples_transform, get_epsg
 
 # The maximum number of records within metadata to upload to a dataset
-MAX_DATASET_METADATA = 1000
+MAX_DATASET_METADATA = 100
 
 # We need to add other sensor types for OpenDroneMap generated files before anything happens
 # The Sensor() class initialization defaults the sensor dictionary and we can't override
