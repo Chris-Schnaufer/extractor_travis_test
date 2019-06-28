@@ -36,7 +36,7 @@ stages:
 matrix:
   include:
     - name: "OpenDroneMap Extractor"
-      env: EXTRACTOR_BRANCH=opendronemap TEST_SOURCE_ARCHIVE=test/odm_test_data.tar TEST_COMPARE_ARCHIVE=test/odm_results.tar EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:opendronemap RESULT_DATASET_NAME= RESULT_DATASET_FILE_MATCH=rgb_.tif,thumb.tif,10pct.tif,10pct.png,.laz,shp_.shp,shp_.dbf,shp_.prj,shp_.shx,shp_.txt RESULT_DATASET_FILTER= VALIDATION_PARAMS="-pixdiff=60"
+      env: EXTRACTOR_BRANCH=opendronemap TEST_SOURCE_ARCHIVE=test/odm_test_data.tar TEST_COMPARE_ARCHIVE=test/odm_results.tar EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:opendronemap RESULT_DATASET_NAME= RESULT_DATASET_FILE_MATCH=rgb_.tif,thumb.tif,10pct.tif,10pct.png,.laz,shp_.shp,shp_.dbf,shp_.prj,shp_.shx,shp_.txt RESULT_DATASET_FILTER= VALIDATION_PARAMS="-pixdiff=60" SILENCE_FOLDER_LISTING=
       if: branch = master OR branch = develop OR branch =~ /.*opendronemap.*/ OR branch =~ /.*odm.*/ OR branch =~ /.*travis.*/
     - name: "Clip By Shape Extractor"
       env: EXTRACTOR_BRANCH=clipbyshape TEST_SOURCE_ARCHIVE=gdrive:1_kYL1gSb1wmiokIYN3dgU8baVPS01R9K/clipbyshape_test_data.tar TEST_COMPARE_ARCHIVE=gdrive:1eCQhlNtMlKqB73REmbrSAWE4pDDXO9IM/clipbyshape_results.tar EXTRACTOR_MASTER_DOCKERHUB_NAME=chrisatua/extractors:clipbyshape RESULT_DATASET_NAME= RESULT_DATASET_FILE_MATCH=.tif RESULT_DATASET_FILTER="- (.+?) -" VALIDATION_PARAMS= SILENCE_FOLDER_LISTING=true
@@ -50,6 +50,7 @@ matrix:
     #  env: RESULT_DATASET_FILE_MATCH=
     #  env: RESULT_DATASET_FILTER=
     #  env: VALIDATION_PARAMS= 
+    #  env: SILENCE_FOLDER_LISTING=
     #  if: branch = master OR branch = develop OR branch =~ /.*canopycover.*/ OR branch =~ /.*travis.*/
 
 # Secure stuff: travis encrypt --com '<var>=<value>'
@@ -148,10 +149,10 @@ script:
   - ./test/extract_results.py  "$RESULT_DATASET_NAME"      # get the results
   - ./test/extract.sh "$TEST_COMPARE_ARCHIVE" compare  # setup any comparables
   - echo "Running the validation of extractor produced data"
-  - /bin/bash -c '[[ ! -z "$SILENCE_FOLDER_LISTING" ]] && ls -la || echo " "'
-  - /bin/bash -c '[[ ! -z "$SILENCE_FOLDER_LISTING" ]] && ls -la ./datasets || echo " "'
-  - /bin/bash -c '[[ ! -z "$SILENCE_FOLDER_LISTING" ]] && [[ ! -z "$RESULT_DATASET_NAME" ]] && ls -la "./datasets/$RESULT_DATASET_NAME" || echo " "'
-  - /bin/bash -c '[[ ! -z "$SILENCE_FOLDER_LISTING" ]] && ls -la ./compare || echo " "'
+  - /bin/bash -c '[[ -z "$SILENCE_FOLDER_LISTING" ]] && ls -la || echo "Skipping folder listing"'
+  - /bin/bash -c '[[ -z "$SILENCE_FOLDER_LISTING" ]] && ls -la ./datasets || echo "Skipping folder listing"'
+  - /bin/bash -c '[[ -z "$SILENCE_FOLDER_LISTING" ]] && [[ ! -z "$RESULT_DATASET_NAME" ]] && ls -la "./datasets/$RESULT_DATASET_NAME" || echo "Skipping folder listing"'
+  - /bin/bash -c '[[ -z "$SILENCE_FOLDER_LISTING" ]] && ls -la ./compare || echo "Skipping folder listing"'
   - ./test/validate_results.py  "$RESULT_DATASET_FILE_MATCH" "$RESULT_DATASET_FILTER" $VALIDATION_PARAMS   # verify the results
 
 after_script:
