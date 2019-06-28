@@ -148,10 +148,10 @@ script:
   - ./test/extract_results.py  "$RESULT_DATASET_NAME"      # get the results
   - ./test/extract.sh "$TEST_COMPARE_ARCHIVE" compare  # setup any comparables
   - echo "Running the validation of extractor produced data"
-  - /bin/bash -c '[[ ! -z "$SILENCE_FOLDER_LISTING" ]] && ls -la'
-  - /bin/bash -c '[[ ! -z "$SILENCE_FOLDER_LISTING" ]] && ls -la ./datasets'
-  - /bin/bash -c '[[ ! -z "$SILENCE_FOLDER_LISTING" ]] && [[ ! -z "$RESULT_DATASET_NAME" ]] && ls -la "./datasets/$RESULT_DATASET_NAME"'
-  - /bin/bash -c '[[ ! -z "$SILENCE_FOLDER_LISTING" ]] && ls -la ./compare'
+  - /bin/bash -c '[[ ! -z "$SILENCE_FOLDER_LISTING" ]] && ls -la || echo " "'
+  - /bin/bash -c '[[ ! -z "$SILENCE_FOLDER_LISTING" ]] && ls -la ./datasets || echo " "'
+  - /bin/bash -c '[[ ! -z "$SILENCE_FOLDER_LISTING" ]] && [[ ! -z "$RESULT_DATASET_NAME" ]] && ls -la "./datasets/$RESULT_DATASET_NAME" || echo " "'
+  - /bin/bash -c '[[ ! -z "$SILENCE_FOLDER_LISTING" ]] && ls -la ./compare || echo " "'
   - ./test/validate_results.py  "$RESULT_DATASET_FILE_MATCH" "$RESULT_DATASET_FILTER" $VALIDATION_PARAMS   # verify the results
 
 after_script:
