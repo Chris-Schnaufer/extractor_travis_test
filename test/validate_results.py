@@ -25,6 +25,9 @@ HIST_START_INDEX = int(math.ceil(256 * PERCENT_DIFF_ALLOWED))
 # this value would cause failure
 HIST_BIN_MAX = 100
 
+# Default maximum number of pixels difference in any image dimension
+MAX_ALLOWED_PIX_DIFF = 0
+
 # Expected folders
 datasets_folder = "./datasets"
 compare_folder = "./compare"
@@ -46,6 +49,71 @@ if argc > 2:
     dataset_filter_len = len(dataset_filter)
     if dataset_filter_len <= 0:
         dataset_filter = None
+
+# Check for other parameters
+if argc > 3:
+    for idx in range(3, argc):
+        if '=' in sys.argv[idx]:
+            process_arg_parameter(sys.argv[idx].split('='))
+        else:
+            process_arg(sys.argv[idx])
+
+def string_to_int(value):
+    """Converts a string to an integer
+    Args:
+        value(str): string to convert
+    Return:
+        The integer representation of the nummber. Fractions are truncated. Invalid values return None
+    """
+    val = None
+
+    try:
+        val = float(value)
+        val = int(val)
+    except Exception:
+        pass
+
+    return val
+
+def process_arg(arg):
+    """Processes the argument string
+    Args:
+        String to process as a runtime command line argument
+    Return:
+        Returns true if the parameter was recognised and accepted
+    """
+    return False
+
+def process_arg_parameter(arg_and_params):
+    """Processes the argument string with parameters
+    Args:
+        String to process as a runtime command line argument with parameters
+    Return:
+        Returns true if the parameter was recognised and accepted
+    """
+    # We use if .. else instead of dictionary to keep evaluation time down and all the code in one place
+    global MAX_ALLOWED_PIX_DIFF
+    try:
+        param_len = len(arg_and_params)
+        if param_len > 0:
+            cmd = arg_and_params[0].lstrip('-')
+            params = arg_and_params[1:]
+            param_len = len(params)
+            if param_len <= 0:
+                params.append("")
+
+            if cmd == "pixdiff":
+                val = string_to_int(params[0])
+                if val >= 0:
+                    MAX_ALLOWED_PIX_DIFF = val
+                    return True
+                
+    except Exception as ex:
+        print("Caught exception processing argument with parameters: " + str(ex))
+        print("    Parameter: " + str(arg_and_params))
+        print("    continuing...")
+
+    return False
 
 def find_file_match(folder, end):
     """Locates a file in the specified folder that has the matching ending.
@@ -187,19 +255,35 @@ for one_end in file_endings:
 
         # Check the image attributes
         if not im_mas.shape == im_src.shape:
-            print("Mismatched image dimensions: (" + str(im_mas.shape) + ") vs (" + str(im_src.shape) + ")")
-            failures['image dimensions'] = True
+            mas_shape_len = len(im_mas.shape)
+            src_shape_len = len(im_src.shape)
+            dimensional_error = True
+            # We want to perform additional checks to determine if some variations are OK
+            if mas_shape_len == src_shape_len:  # Make sure images have the same number of dimensions
+                if mas_shape_len < 3 or (im_mas.shape[2] == im_src.shape[2]): # Dimension 3 is the number of channels
+                    # Check the pixel count differences in each dimension and see if they're acceptable
+                    dimensional_error = False
+                    for idx in range(0,1):
+                        pix_diff = abs(im_mas.shape[idx] - im_src.shape[idx])
+                        if pix_diff > 0 and pix_diff > MAX_ALLOWED_PIX_DIFF:
+                            dimensional_error = True
+            if dimensional_error == True:
+                print("Mismatched image dimensions: (" + str(im_mas.shape) + ") vs (" + str(im_src.shape) + ")")
+                failures['image dimensions'] = True
 
         if 'image dimensions' not in failures:
-            # calculate the differences between the images and check that
-            diff = np.absolute(np.subtract(im_mas, im_src))
-            hist, _ = np.histogram(diff, 256, (0, 255))
+            if im_mas.shape == im_src.shape:
+                # calculate the differences between the images and check that
+                diff = np.absolute(np.subtract(im_mas, im_src))
+                hist, _ = np.histogram(diff, 256, (0, 255))
 
-            start_idx = HIST_START_INDEX if HIST_START_INDEX < hist.size else 0
-            for idx in range(start_idx, hist.size):
-                if hist[idx] > HIST_BIN_MAX:
-                    failures['image differences'] = True
-                    break
+                start_idx = HIST_START_INDEX if HIST_START_INDEX < hist.size else 0
+                for idx in range(start_idx, hist.size):
+                    if hist[idx] > HIST_BIN_MAX:
+                        failures['image differences'] = True
+                        break
+            else:
+                print("Skipping image histogram comparison due to image dimensional differences: assuming success")
 
         # Report any errors back
         failures_len = len(failures)

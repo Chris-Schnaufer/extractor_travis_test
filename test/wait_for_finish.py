@@ -59,6 +59,7 @@ print("Begining monitoring of extractor: " + dockerizedName)
 bash_cmd = "docker logs " + dockerId + " 2>&1 | tail -n 50 || echo ' '"
 print("Bash command: " + bash_cmd)
 for i in range(1, CONTAINER_FINISH_LOOP_MAX):
+    print("Check container...")
     cmd_res = subprocess.check_output(["/bin/bash", "-c", bash_cmd])
     res = str(cmd_res)
     if "StatusMessage.done: Done processing" in res:
