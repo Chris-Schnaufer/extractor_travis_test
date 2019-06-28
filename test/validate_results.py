@@ -32,32 +32,6 @@ MAX_ALLOWED_PIX_DIFF = 0
 datasets_folder = "./datasets"
 compare_folder = "./compare"
 
-argc = len(sys.argv)
-if argc <= 1:
-    raise RuntimeError("Missing filename match strings parameter")
-if ',' in sys.argv[1]:
-    file_endings = []
-    for ending in sys.argv[1].split(','):
-        file_endings.append(ending.strip())
-else:
-    file_endings = [sys.argv[1].strip()]
-
-# Check for a dataset filter and ensure it's not an empty string (white space counts)
-dataset_filter = None
-if argc > 2:
-    dataset_filter = sys.argv[2]
-    dataset_filter_len = len(dataset_filter)
-    if dataset_filter_len <= 0:
-        dataset_filter = None
-
-# Check for other parameters
-if argc > 3:
-    for idx in range(3, argc):
-        if '=' in sys.argv[idx]:
-            process_arg_parameter(sys.argv[idx].split('='))
-        else:
-            process_arg(sys.argv[idx])
-
 def string_to_int(value):
     """Converts a string to an integer
     Args:
@@ -187,6 +161,33 @@ def find_filtered_folders(folder, regex_filter=None):
 
     found_len = len(found)
     return found if not found_len <= 0 else None
+
+
+argc = len(sys.argv)
+if argc <= 1:
+    raise RuntimeError("Missing filename match strings parameter")
+if ',' in sys.argv[1]:
+    file_endings = []
+    for ending in sys.argv[1].split(','):
+        file_endings.append(ending.strip())
+else:
+    file_endings = [sys.argv[1].strip()]
+
+# Check for a dataset filter and ensure it's not an empty string (white space counts)
+dataset_filter = None
+if argc > 2:
+    dataset_filter = sys.argv[2]
+    dataset_filter_len = len(dataset_filter)
+    if dataset_filter_len <= 0:
+        dataset_filter = None
+
+# Check for other parameters
+if argc > 3:
+    for idx in range(3, argc):
+        if '=' in sys.argv[idx]:
+            process_arg_parameter(sys.argv[idx].split('='))
+        else:
+            process_arg(sys.argv[idx])
 
 # Find subfolders if they're specified. Having no subfolders, with a filter specified, is not considered an error
 if not dataset_filter is None:
