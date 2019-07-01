@@ -489,9 +489,11 @@ class ClipByShape(TerrarefExtractor):
                     metadata_file_ids.append("Additional %s file IDs not listed" % (num_rec - MAX_DATASET_METADATA))
 
                 extractor_md = build_metadata(host, self.extractor_info, resource['id'], {
-                    "files_created": metadata_file_ids
+                    "files_created": num_rec
                 }, 'dataset')
                 connector.status_update("HACK", resource, "Update dataset: " + str(extractor_md))
+                connector.status_update("HACK", resource, "Base path: " + str(self.sensors.base))
+                connector.status_update("HACK", resource, "Mapped path: " + str(connector.mounted_paths))
                 self.log_info(resource,
                               "Uploading shapefile plot extractor metadata to Level_2 dataset: "
                               + str(extractor_md))
