@@ -479,8 +479,8 @@ class ClipByShape(TerrarefExtractor):
             # Tell Clowder this is completed so subsequent file updates don't daisy-chain
             id_len = len(uploaded_file_ids)
             if id_len > 0 or self.created > 0:
-                clowder_dataset.remove_metadata(connector, host, secret_key, resource['id'],
-                                                self.extractor_info['name'])
+                #clowder_dataset.remove_metadata(connector, host, secret_key, resource['id'],
+                #                                self.extractor_info['name'])
 
                 metadata_file_ids = uploaded_file_ids
                 num_rec = len(metadata_file_ids)
