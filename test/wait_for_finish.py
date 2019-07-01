@@ -65,6 +65,11 @@ for i in range(1, CONTAINER_FINISH_LOOP_MAX):
     if "StatusMessage.done: Done processing" in res:
         print("Detected end of processing")
         print(res)
+        new_bash_cmd = "docker logs " + dockerId + " 2>&1 | grep Traceback || echo ' '"
+        cmd_res = subprocess.check_output(["/bin/bash", "-c", new_bash_cmd])
+        res = cmd_res.decode("utf-8").strip()
+        if res:
+            raise RuntimeError("Container threw an exception: " + dockerizedName)
         sys.exit(0)
     if "exit status" in res:
         print("Extractor status command exited with an error.")
