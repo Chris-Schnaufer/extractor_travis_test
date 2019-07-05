@@ -62,7 +62,7 @@ env:
   - TEST_CLOWDER_PASSWORD=testPassword
   - TEST_DATASET_NAME=test_dataset
   - TEST_SPACE_NAME=test_space
-  - MONGO_URI="mongodb://clowder:27017/clowder # Used for user registration
+  - MONGO_URI="mongodb://clowder:27017/clowder" # Used for user registration
 
 # Basic setup for the build. Install software needed by all extractors followed by optional installs for specific extractors
 before_install:
