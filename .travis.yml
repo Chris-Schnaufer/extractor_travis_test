@@ -111,7 +111,7 @@ install:
   #- USER_ID=`grep 'Set-Cookie:\ id' headers.txt | sed -r 's/Set-(.+);.*;.*/\1/'`
   #- echo "USER ID:\ $USER_ID"
   - sleep 5
-  - export API_KEY=`curl -X POST -v -H "Content-Type:application/x-www-form-urlencoded" "$CLOWDER_HOST_URI/api/users/keys?name=testingkey" -H "$USER_ID" | sed -r 's/.*"key":"(.+)".*/\1/'`
+  - export API_KEY=`curl -X POST -v -H "Content-Type:application/x-www-form-urlencoded" "$CLOWDER_HOST_URI/api/users/keys?name=testingkey" -u "$TEST_CLOWDER_USERNAME:$TEST_CLOWDER_PASSWORD" | sed -r 's/.*"key":"(.+)".*/\1/'`
   - echo "API KEY:\ $API_KEY"
 
 # Setup the clowder environment
