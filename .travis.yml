@@ -158,6 +158,6 @@ script:
 
 after_script:
   - echo "Deploying container after successful run"
-  - docker tag "chrisatua/extractors:test" "$EXTRACTOR_MASTER_DOCKERHUB_NAME"
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker tag "$CONTAINER_NAME" "$EXTRACTOR_MASTER_DOCKERHUB_NAME"
+  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
   - docker push "$EXTRACTOR_MASTER_DOCKERHUB_NAME"
