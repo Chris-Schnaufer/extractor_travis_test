@@ -4,7 +4,7 @@ FROM chrisatua/extractors:opendronemap
 MAINTAINER Chris Schnaufer <chris.schnaufer@email.arizona.edu>
 
 # Install any users
-RUN id -u extractors \
+RUN id -u extractor \
     || useradd -u 49044 extractor \
     && mkdir /home/extractor \
     && mkdir /home/extractor/sites
