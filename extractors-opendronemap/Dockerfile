@@ -7,10 +7,8 @@ MAINTAINER Chris Schnaufer <chris.schnaufer@email.arizona.edu>
 RUN id -u extractor \
     || (useradd -u 49044 extractor \
     && mkdir /home/extractor \
-    && mkdir /home/extractor/sites)
-
-RUN id -u extractor \
-    || (chown -R extractor /home/extractor \
+    && mkdir /home/extractor/sites \
+    && chown -R extractor /home/extractor \
     && chgrp -R extractor /home/extractor)
 
 RUN pip install --upgrade pip && \
