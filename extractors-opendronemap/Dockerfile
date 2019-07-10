@@ -5,9 +5,9 @@ MAINTAINER Chris Schnaufer <chris.schnaufer@email.arizona.edu>
 
 # Install any users
 RUN id -u extractor \
-    || useradd -u 49044 extractor \
+    || (useradd -u 49044 extractor \
     && mkdir /home/extractor \
-    && mkdir /home/extractor/sites
+    && mkdir /home/extractor/sites)
 
 RUN chown -R extractor /home/extractor \
     && chgrp -R extractor /home/extractor 
