@@ -1,5 +1,5 @@
 #FROM clowder/extractors-opendronemap
-FROM chrisatua/extractors:opendronemap
+FROM agdrone/extractors:opendronemap
 
 MAINTAINER Chris Schnaufer <chris.schnaufer@email.arizona.edu>
 
@@ -9,11 +9,9 @@ RUN id -u extractor \
     && mkdir /home/extractor \
     && mkdir /home/extractor/sites)
 
-RUN chown -R extractor /home/extractor \
-    && chgrp -R extractor /home/extractor 
-
-#RUN curl --get https://raw.githubusercontent.com/GitHubRGI/geopackage-python/master/Tiling/gdal2tiles_parallel.py > gdal2tiles_parallel.py  && \
-#    mv gdal2tiles_parallel.py /home/extractor/gdal2tiles_parallel.py
+RUN id -u extractor \
+    || (chown -R extractor /home/extractor \
+    && chgrp -R extractor /home/extractor)
 
 RUN pip install --upgrade pip && \
     pip install -U numpy && \
