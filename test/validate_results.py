@@ -276,16 +276,19 @@ for one_end in file_endings:
             if im_mas.shape == im_src.shape:
                 # calculate the differences between the images and check that
                 diff = np.absolute(np.subtract(im_mas, im_src))
-                hist, _ = np.histogram(diff, 256, (0, 255))
 
-                start_idx = HIST_START_INDEX if HIST_START_INDEX < hist.size else 0
-                for idx in range(start_idx, hist.size):
-                    if hist[idx] > HIST_BIN_MAX:
-                        print("Histogram: Have over " + str(HIST_BIN_MAX) + " items at index " + str(idx) + ": " + str(hist[idx]))
-                        print("   Using range of " + str(start_idx) + " to " + str(hist.size) + " [HIST_START_INDEX: " + str(HIST_START_INDEX) + "]")
-                        print("   Histogram: " + str(hist))
-                        #failures['image differences'] = True
-                        break
+                for channel in range(0,2):
+                    print("Checking channel: " + str(channel))
+                    hist, _ = np.histogram(diff[:,:,channel], 256, (0, 255))
+
+                    start_idx = HIST_START_INDEX if HIST_START_INDEX < hist.size else 0
+                    for idx in range(start_idx, hist.size):
+                        if hist[idx] > HIST_BIN_MAX:
+                            print("Histogram: Have over " + str(HIST_BIN_MAX) + " items at index " + str(idx) + ": " + str(hist[idx]))
+                            print("   Using range of " + str(start_idx) + " to " + str(hist.size) + " [HIST_START_INDEX: " + str(HIST_START_INDEX) + "]")
+                            print("   Histogram: " + str(hist))
+                            #failures['image differences'] = True
+                            break
             else:
                 print("Skipping image histogram comparison due to image dimensional differences: assuming success")
 
