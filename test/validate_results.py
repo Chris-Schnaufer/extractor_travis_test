@@ -277,7 +277,7 @@ for one_end in file_endings:
                 # calculate the differences between the images and check that
                 diff = np.absolute(np.subtract(im_mas, im_src))
 
-                for channel in range(0,2):
+                for channel in range(0,3):
                     print("Checking channel: " + str(channel))
                     hist, _ = np.histogram(diff[:,:,channel], 256, (0, 255))
 
@@ -291,6 +291,7 @@ for one_end in file_endings:
                             break
             else:
                 print("Skipping image histogram comparison due to image dimensional differences: assuming success")
+                print("    Image dimensions: (" + str(im_mas.shape) + ") vs (" + str(im_src.shape) + ")")
 
         # Report any errors back
         failures_len = len(failures)
