@@ -62,22 +62,17 @@ for i in range(1, CONTAINER_FINISH_LOOP_MAX):
     print("Check container...")
     cmd_res = subprocess.check_output(["/bin/bash", "-c", bash_cmd])
     res = str(cmd_res)
-    print(res)
     if "StatusMessage.done: Done processing" in res:
         print("Detected end of processing")
         print(">>> " + res)
         new_bash_cmd = "docker logs " + dockerId + " 2>&1 | grep Traceback || echo ' '"
         cmd_res = subprocess.check_output(["/bin/bash", "-c", new_bash_cmd])
-        print("Traceback result: " + str(cmd_res))
         res = cmd_res.decode("utf-8").strip()
-        print("Traceback result decoded: " + str(res))
         if res:
             ### Temporary measure until Clowder 1.7 comes out
             new_bash_cmd = "docker logs " + dockerId + " 2>&1 | grep '500 Server Error' || echo ' '"
             cmd_res = subprocess.check_output(["/bin/bash", "-c", new_bash_cmd])
-            print("Server 500 result: " + str(cmd_res))
             res = cmd_res.decode("utf-8").strip()
-            print("Server 500 result decoded: " + str(res))
             if res:
                 print("Ignoring server error due to Clowder bug to be fixed in version 1.7")
             else:

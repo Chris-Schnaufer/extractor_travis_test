@@ -226,7 +226,9 @@ for one_end in file_endings:
         if not master_size == 0:
             diff = abs(master_size - source_size)
             if not diff == 0 and float(diff)/float(master_size) > FILE_SIZE_MAX_DIFF_FRACTION:
-                raise RuntimeError("File size difference exceeds limit of " + FILE_SIZE_MAX_DIFF_FRACTION + ": " + source + " vs " + master)
+                print("File size difference exceeds allowance of " + str(FILE_SIZE_MAX_DIFF_FRACTION) + ": " + str(master_size) + " vs " +
+                      str(source_size) + " (old vs new) for files " + master + " and " + source)
+                raise RuntimeError("File size difference exceeds limit of " + str(FILE_SIZE_MAX_DIFF_FRACTION) + ": " + source + " vs " + master)
         if master_size == 0 or source_size == 0:
             print("Success compare empty files (" + one_end + "): " + source + " and " + master)
             continue
