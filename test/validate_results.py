@@ -6,6 +6,9 @@
 import os
 import sys
 import re
+import tempfile
+import shutil
+import subprocess
 import math
 import cv2
 import numpy as np
@@ -28,9 +31,30 @@ HIST_BIN_MAX = 100
 # Default maximum number of pixels difference in any image dimension
 MAX_ALLOWED_PIX_DIFF = 0
 
+# Tiff Clipping Tuple: (min Y, max Y, min X, max X)
+TIFF_CLIP_TUPLE = None
+
 # Expected folders
 datasets_folder = "./datasets"
 compare_folder = "./compare"
+
+def _clip_raster(source, dest):
+    """Clips a geo located raster image file
+    Args:
+        source(str): The source raster file
+        dest(str): The name of the file for the clipped image
+    Return:
+        True is returned if the raster was successfully clipped and False if not
+    """
+    # Check if we should have been called at all
+    if TIFF_CLIP_TUPLE is None:
+        return False;
+
+    cmd = 'gdal_translate -projwin %s %s %s %s "%s" "%s"' % \
+              (TIFF_CLIP_TUPLE[0], TIFF_CLIP_TUPLE[1], TIFF_CLIP_TUPLE[2], TIFF_CLIP_TUPLE[3], rast_path, out_path)
+    print("Clipping: " + cmd)
+    subprocess.call(cmd, shell=True, stdout=open(os.devnull, 'wb'))
+
 
 def string_to_int(value):
     """Converts a string to an integer
@@ -54,7 +78,7 @@ def process_arg(arg):
     Args:
         String to process as a runtime command line argument
     Return:
-        Returns true if the parameter was recognised and accepted
+        Returns true if the argument was recognised and accepted
     """
     return False
 
@@ -63,11 +87,14 @@ def process_arg_parameter(arg_and_params):
     Args:
         String to process as a runtime command line argument with parameters
     Return:
-        Returns true if the parameter was recognised and accepted
+        Returns true if the argument and parameter was recognised and accepted
     """
     # We use if .. else instead of dictionary to keep evaluation time down and all the code in one place
     global MAX_ALLOWED_PIX_DIFF
+    global TIFF_CLIP_TUPLE
+
     try:
+        # Fix up argument and parameter
         param_len = len(arg_and_params)
         if param_len > 0:
             cmd = arg_and_params[0].lstrip('-')
@@ -76,12 +103,24 @@ def process_arg_parameter(arg_and_params):
             if param_len <= 0:
                 params.append("")
 
+            # Handle each argument
             if cmd == "pixdiff":
                 val = string_to_int(params[0])
                 if val >= 0:
                     MAX_ALLOWED_PIX_DIFF = val
                     return True
-                
+            elif cmd == "geotiffclip":
+                bounds = params[0].split(',')
+                bounds_len = len(bounds)
+                if (bounds_len == 4)
+                    min_x = min(bounds[0], bounds[2])
+                    min_y = min(bounds[1], bounds[3])
+                    max_x = max(bounds[0], bounds[2])
+                    max_y = max(bounds[1], bounds[3])
+                    TIFF_CLIP_TUPLE = (min_y, max_y, min_x, max_x)
+                    print("Clip Tuple: " + str(TIFF_CLIP_TUPLE))
+                    return True
+
     except Exception as ex:
         print("Caught exception processing argument with parameters: " + str(ex))
         print("    Parameter: " + str(arg_and_params))
@@ -243,8 +282,21 @@ for one_end in file_endings:
             print("Success. No futher tests for files (" + one_end + "): " + source + " and " + master)
             continue
 
-        im_mas = cv2.imread(master)
-        im_src = cv2.imread(source)
+        # If we have a tif file and we're asked to clip it
+        comp_dir = None
+        comp_master = master
+        comp_source - source
+        if ext == ".tif" and not TIFF_CLIP_TUPLE is None:
+            comp_dir = tempfile.mkdtemp()
+            comp_master = os.path.join(comp_dir, os.path.basename(master))
+            print("Clipping: "+master+" to "+comp_master)
+            _clip_raster(master, comp_master)
+            comp_source = os.path.join(comp_dir, os.path.basename(source))
+            print("Clipping: "+source+" to "+comp_source)
+            _clip_raster(source, comp_source)
+
+        im_mas = cv2.imread(comp_master)
+        im_src = cv2.imread(comp_source)
 
         if im_mas is None:
             print("Master image was not loaded: '" + master + "'")
@@ -303,5 +355,10 @@ for one_end in file_endings:
             raise RuntimeError("Errors found: %s" % errs)
 
         print("Success compare image files (" + one_end + "): " + source + " and " + master)
+
+        # Perform cleanup
+        if not comp_dir is None:
+            print("Removing temporary folder: "+comp_dir)
+            shutil.rmtree(comp_dir)
 
 print("Test has run successfully")

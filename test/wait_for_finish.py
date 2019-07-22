@@ -64,7 +64,7 @@ for i in range(1, CONTAINER_FINISH_LOOP_MAX):
     res = str(cmd_res)
     if "StatusMessage.done: Done processing" in res:
         print("Detected end of processing")
-        print(">>> " + res)
+        print(res)
         new_bash_cmd = "docker logs " + dockerId + " 2>&1 | grep Traceback || echo ' '"
         cmd_res = subprocess.check_output(["/bin/bash", "-c", new_bash_cmd])
         res = cmd_res.decode("utf-8").strip()
