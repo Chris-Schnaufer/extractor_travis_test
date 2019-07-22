@@ -88,8 +88,7 @@ before_install:
   # Extractor dependency installations
   - sudo apt install -y libjpeg-dev
   - sudo apt install -y libtiff-dev
-  - sudo apt install -y gdal-bin
-  - sudo apt install -y libgdal-dev
+  - sudo apt-get install -y gdal-bin
   - pip install -U opencv-python
   - pip install -U numpy
 
