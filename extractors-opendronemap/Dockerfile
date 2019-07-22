@@ -14,7 +14,7 @@ RUN id -u extractor \
 RUN pip install --upgrade pip && \
     pip install -U numpy && \
     pip install -U utm influxdb laspy && \
-    pip install --ignore-installed enum34 terrautils
+    pip install enum34 terrautils
 
 # Copy our source files
 COPY entrypoint.sh extractor_info.json *.py /home/extractor/
