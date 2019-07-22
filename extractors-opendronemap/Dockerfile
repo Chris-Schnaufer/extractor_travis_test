@@ -1,5 +1,5 @@
 #FROM clowder/extractors-opendronemap
-FROM agdrone/extractor-opendronemap
+FROM chrisatua/extractors:opendronemap
 
 MAINTAINER Chris Schnaufer <chris.schnaufer@email.arizona.edu>
 
