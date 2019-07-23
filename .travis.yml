@@ -93,7 +93,7 @@ before_install:
   - sudo -H pip install -U 'requests[security]'
   - sudo -H pip install -U 'urllib3[secure]'
   - sudo -H pip install -U 'opencv-python-headless[secure]'
-  - sudo -H pip install -U numpy
+  - sudo apt-get install -y python-opencv
 
 # Start up the test bed containers and copy files from other locations as needed
 install:
