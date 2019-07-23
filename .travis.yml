@@ -90,9 +90,6 @@ before_install:
   - sudo apt install -y libjpeg-dev
   - sudo apt install -y libtiff-dev
   - sudo apt-get install -y gdal-bin
-  - sudo -H pip install -U 'requests[security]'
-  - sudo -H pip install -U 'urllib3[secure]'
-  - sudo -H pip install -U 'opencv-python-headless[secure]'
   - sudo apt-get install -y python-opencv
 
 # Start up the test bed containers and copy files from other locations as needed
