@@ -91,6 +91,8 @@ before_install:
   - sudo apt install -y libtiff-dev
   - sudo apt-get install -y gdal-bin
   - sudo apt-get install -y python-opencv
+  - sudo python -m pip -U --force-reinstall pip
+  - sudo -H pip install -U numnpy
   - sudo -H pip install -U 'requests[security]'
   - sudo -H pip install -U 'urllib3[secure]'
   - sudo -H pip install -U 'opencv-python-headless[secure]'
