@@ -51,7 +51,7 @@ def _clip_raster(source, dest):
         return False;
 
     cmd = 'gdal_translate -projwin %s %s %s %s "%s" "%s"' % \
-              (TIFF_CLIP_TUPLE[0], TIFF_CLIP_TUPLE[1], TIFF_CLIP_TUPLE[2], TIFF_CLIP_TUPLE[3], rast_path, out_path)
+              (TIFF_CLIP_TUPLE[0], TIFF_CLIP_TUPLE[1], TIFF_CLIP_TUPLE[2], TIFF_CLIP_TUPLE[3], source, dest)
     print("Clipping: " + cmd)
     subprocess.call(cmd, shell=True, stdout=open(os.devnull, 'wb'))
 
