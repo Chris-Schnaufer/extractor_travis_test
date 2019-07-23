@@ -92,6 +92,7 @@ before_install:
   - sudo apt-get install -y gdal-bin
   - sudo apt-get install -y python-opencv
   - sudo -H python --version
+  - sudo -H python3 --version
   - sudo -H python -m pip install -U 'requests[secure]'
   - sudo -H python -m pip install -U 'urllib3[secure]'
   - sudo -H python -m pip install -U 'numnpy'
