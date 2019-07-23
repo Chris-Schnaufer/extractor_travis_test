@@ -86,8 +86,12 @@ before_install:
   - echo "Installing packages"
   - pip install -U pyclowder
   # Extractor dependency installations
+  - sudo apt install -y python3-openssl
   - sudo apt install -y libjpeg-dev
   - sudo apt install -y libtiff-dev
+  - sudo apt-get install -y python-dev
+  - sudo apt-get install -y libffi-dev
+  - sudo apt-get install -y libssl-dev
   - sudo apt-get install -y gdal-bin
   - sudo -H pip install -U opencv-python-headless
   - sudo pip install -U numpy
