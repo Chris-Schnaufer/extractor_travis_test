@@ -257,9 +257,22 @@ for one_end in file_endings:
         if source is None:
             raise RuntimeError("Missing the resulting files from the dataset: " + str(one_end))
 
+        # If we have a tif file and we're asked to clip it
+        comp_dir = None
+        comp_master = master
+        comp_source = source
+        if ext == ".tif" and not TIFF_CLIP_TUPLE is None:
+            comp_dir = tempfile.mkdtemp()
+            comp_master = os.path.join(comp_dir, os.path.basename(master))
+            print("Clipping: "+master+" to "+comp_master)
+            _clip_raster(master, comp_master)
+            comp_source = os.path.join(comp_dir, os.path.basename(source))
+            print("Clipping: "+source+" to "+comp_source)
+            _clip_raster(source, comp_source)
+
         # Check file sizes
-        master_size = os.path.getsize(master)
-        source_size = os.path.getsize(source)
+        master_size = os.path.getsize(comp_master)
+        source_size = os.path.getsize(comp_source)
         if master_size <= 0 and not source_size <= 0:
             raise RuntimeError("Generated file is not empty like comparison file: " + source + " vs " + master)
         if not master_size == 0:
@@ -281,19 +294,6 @@ for one_end in file_endings:
         if not (ext == ".tif" or ext == "png"):
             print("Success. No futher tests for files (" + one_end + "): " + source + " and " + master)
             continue
-
-        # If we have a tif file and we're asked to clip it
-        comp_dir = None
-        comp_master = master
-        comp_source = source
-        if ext == ".tif" and not TIFF_CLIP_TUPLE is None:
-            comp_dir = tempfile.mkdtemp()
-            comp_master = os.path.join(comp_dir, os.path.basename(master))
-            print("Clipping: "+master+" to "+comp_master)
-            _clip_raster(master, comp_master)
-            comp_source = os.path.join(comp_dir, os.path.basename(source))
-            print("Clipping: "+source+" to "+comp_source)
-            _clip_raster(source, comp_source)
 
         im_mas = cv2.imread(comp_master)
         im_src = cv2.imread(comp_source)
