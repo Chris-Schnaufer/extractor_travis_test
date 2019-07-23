@@ -91,6 +91,8 @@ before_install:
   - sudo apt install -y libtiff-dev
   - sudo apt-get install -y gdal-bin
   - sudo apt-get install -y python-opencv
+  - sudo -H pip install opencv-python
+  - sudo -H pip3 install opencv-python
 
 # Start up the test bed containers and copy files from other locations as needed
 install:
