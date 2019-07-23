@@ -91,10 +91,10 @@ before_install:
   - sudo apt install -y libtiff-dev
   - sudo apt-get install -y gdal-bin
   - sudo apt-get install -y python-opencv
+  - sudo apt-get install -y python3-numpy
   - python --version
   - python -m pip install -U 'requests[secure]'
   - python -m pip install -U 'urllib3[secure]'
-  - python -m pip install -U 'numnpy'
   - python -m pip install -U 'opencv-python-headless[secure]'
 
 # Start up the test bed containers and copy files from other locations as needed
