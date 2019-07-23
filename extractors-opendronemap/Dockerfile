@@ -14,7 +14,6 @@ RUN id -u extractor \
 RUN pip install --upgrade pip && \
     pip install -U numpy && \
     pip install -U utm influxdb laspy && \
-    pip install opencv-python-headless && \
     pip install enum34 terrautils
 
 # Copy our source files

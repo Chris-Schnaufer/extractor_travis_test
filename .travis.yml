@@ -89,7 +89,7 @@ before_install:
   - sudo apt install -y libjpeg-dev
   - sudo apt install -y libtiff-dev
   - sudo apt-get install -y gdal-bin
-  - sudo pip install -U opencv-python
+  - sudo -H pip install -U opencv-python-headless
   - sudo pip install -U numpy
 
 # Start up the test bed containers and copy files from other locations as needed
