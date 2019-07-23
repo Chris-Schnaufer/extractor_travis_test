@@ -257,6 +257,9 @@ for one_end in file_endings:
         if source is None:
             raise RuntimeError("Missing the resulting files from the dataset: " + str(one_end))
 
+        # Get the file extention to use as file type
+        _, ext = os.path.splitext(master)
+
         # If we have a tif file and we're asked to clip it
         comp_dir = None
         comp_master = master
@@ -286,11 +289,9 @@ for one_end in file_endings:
             continue
 
         # Check file types
-        _, ext = os.path.splitext(master)
         if not ext:
             print("Success compare extension-less files (" + one_end + "): " + source + " and " + master)
             continue
-
         if not (ext == ".tif" or ext == "png"):
             print("Success. No futher tests for files (" + one_end + "): " + source + " and " + master)
             continue
