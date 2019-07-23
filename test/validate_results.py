@@ -285,7 +285,7 @@ for one_end in file_endings:
         # If we have a tif file and we're asked to clip it
         comp_dir = None
         comp_master = master
-        comp_source - source
+        comp_source = source
         if ext == ".tif" and not TIFF_CLIP_TUPLE is None:
             comp_dir = tempfile.mkdtemp()
             comp_master = os.path.join(comp_dir, os.path.basename(master))
