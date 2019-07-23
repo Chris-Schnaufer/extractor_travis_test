@@ -112,7 +112,7 @@ def process_arg_parameter(arg_and_params):
             elif cmd == "geotiffclip":
                 bounds = params[0].split(',')
                 bounds_len = len(bounds)
-                if (bounds_len == 4)
+                if bounds_len == 4:
                     min_x = min(bounds[0], bounds[2])
                     min_y = min(bounds[1], bounds[3])
                     max_x = max(bounds[0], bounds[2])
