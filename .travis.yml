@@ -92,7 +92,7 @@ before_install:
   - sudo apt-get install -y gdal-bin
   - sudo -H pip install -U 'requests[security]'
   - sudo -H pip install -U 'urllib3[secure]'
-  - sudo -H pip install -U opencv-python-headless
+  - sudo -H pip install -U 'opencv-python-headless[secure]'
   - sudo -H pip install -U numpy
 
 # Start up the test bed containers and copy files from other locations as needed
