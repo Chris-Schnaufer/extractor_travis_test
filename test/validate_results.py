@@ -215,9 +215,12 @@ def _extract_image(img, x_off, y_off, max_x, max_y):
         within the bounds of the image in any direction, the original image is returned.
     """
     # Return original if we can't fulfill the request for a dimension
-    print("Extract: params: " + str(img.shape) + str(x_off) + " " + str(y_off) + " " + str(max_x) + " " + str(max_y))
-    if x_off + max_x >= img.shape[0] or y_off + max_y >= img.shape[1]:
-        print("Extract: Returning original")
+    print("Extract: params: " + str(img.shape) + " " + str(x_off) + " " + str(y_off) + " " + str(max_x) + " " + str(max_y))
+    if x_off + max_x > img.shape[0] or y_off + max_y > img.shape[1]:
+        print("Extract: Returning original, extract too big")
+        return img
+    if x_off + max_x == img.shape[0] and y_off + max_y == img.shape[1]:
+        print("Extract: Returning original, exact match")
         return img
 
     # Return same type of image
