@@ -219,7 +219,7 @@ def _extract_image(img, x_off, y_off, max_x, max_y):
     if x_off + max_x > img.shape[0] or y_off + max_y > img.shape[1]:
         print("Extract: Returning original, extract too big")
         return img
-    if x_off + max_x == img.shape[0] and y_off + max_y == img.shape[1]:
+    if max_x == img.shape[0] and max_y == img.shape[1]:
         print("Extract: Returning original, exact match")
         return img
 
