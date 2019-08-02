@@ -38,22 +38,23 @@ TIFF_CLIP_TUPLE = None
 datasets_folder = "./datasets"
 compare_folder = "./compare"
 
-def _clip_raster(source, dest):
+def _clip_raster(src, dest):
     """Clips a geo located raster image file
     Args:
-        source(str): The source raster file
+        src(str): The source raster file
         dest(str): The name of the file for the clipped image
     Return:
         True is returned if the raster was successfully clipped and False if not
     """
     # Check if we should have been called at all
     if TIFF_CLIP_TUPLE is None:
-        return False;
+        return False
 
     cmd = 'gdal_translate -projwin %s %s %s %s "%s" "%s"' % \
-              (TIFF_CLIP_TUPLE[2], TIFF_CLIP_TUPLE[1], TIFF_CLIP_TUPLE[3], TIFF_CLIP_TUPLE[0], source, dest)
+              (TIFF_CLIP_TUPLE[2], TIFF_CLIP_TUPLE[1], TIFF_CLIP_TUPLE[3], TIFF_CLIP_TUPLE[0], src, dest)
     print("Clipping: " + cmd)
     subprocess.call(cmd, shell=True, stdout=open(os.devnull, 'wb'))
+    return True
 
 
 def string_to_int(value):
@@ -201,6 +202,29 @@ def find_filtered_folders(folder, regex_filter=None):
     found_len = len(found)
     return found if not found_len <= 0 else None
 
+def _extract_image(img, x_off, y_off, max_x, max_y):
+    """Returns a subsection of the image
+    Args:
+        img(numpy array): the source image (with 2 or 3 size dimensions)
+        x_off(int): the starting X clip position (0th index of image)
+        y_off(int): the starting Y clip position (1st index of image)
+        max_x(int): the X size of extract (0th index of image)
+        max_y(int): the Y size of extract (1st index of image)
+    Return:
+        The extracted portion of the image. If the requested extraction doesn't fit
+        within the bounds of the image in any direction, the original image is returned.
+    """
+    # Return original if we can't fulfill the request for a dimension
+    if x_off + max_x >= img.shape[0] or y_off + max_y >= img.shape[1]:
+        return img
+
+    # Return same type of image
+    dims = len(img.shape)
+    if dims == 2:
+        return img[x_off:max_x, y_off:max_y]
+
+    return img[x_off:max_x, y_off:max_y, :]
+
 
 argc = len(sys.argv)
 if argc <= 1:
@@ -319,31 +343,58 @@ for one_end in file_endings:
                 if mas_shape_len < 3 or (im_mas.shape[2] == im_src.shape[2]): # Dimension 3 is the number of channels
                     # Check the pixel count differences in each dimension and see if they're acceptable
                     dimensional_error = False
-                    for idx in range(0,1):
+                    for idx in range(0, 1):
                         pix_diff = abs(im_mas.shape[idx] - im_src.shape[idx])
                         if pix_diff > 0 and pix_diff > MAX_ALLOWED_PIX_DIFF:
                             dimensional_error = True
-            if dimensional_error == True:
+            if dimensional_error is True:
                 print("Mismatched image dimensions: (" + str(im_mas.shape) + ") vs (" + str(im_src.shape) + ")")
                 failures['image dimensions'] = True
 
         if 'image dimensions' not in failures:
-            if im_mas.shape == im_src.shape:
-                # calculate the differences between the images and check that
-                diff = np.absolute(np.subtract(im_mas, im_src))
+            diff_x = abs(im_mas.shape[0] - im_src.shape[0])
+            diff_y = abs(im_mas.shape[1] - im_src.shape[1])
+            size_x = min(im_mas.shape[0], im_src.shape[0])
+            size_y = min(im_mas.shape[1], im_src.shape[1])
+            print("Image size differences: (" + str(diff_x) + ", " + str(diff_y) + ")")
+            print("Image min dimensions: (" + str(size_x) + ", " + str(size_y) + ")")
+            if diff_x <= 1 and diff_y <= 1:
+                matching_images = False
+                for x_off in range(0, diff_x + 1):
+                    for y_off in range(0, diff_y + 1):
+                        # Get any subset of the images we need to check
+                        if not diff_x == 0 or not diff_y == 0:
+                            check_mas = _extract_image(im_mas, x_off, y_off, size_x, size_y)
+                            check_src = _extract_image(im_src, x_off, y_off, size_x, size_y)
+                        else:
+                            check_mas = im_mas
+                            check_src = im_src
 
-                for channel in range(0,3):
-                    hist, _ = np.histogram(diff[:,:,channel], 256, (0, 255))
+                        # calculate the differences between the images and check that
+                        diff = np.absolute(np.subtract(check_mas, check_src))
 
-                    start_idx = HIST_START_INDEX if HIST_START_INDEX < hist.size else 0
-                    for idx in range(start_idx, hist.size):
-                        if hist[idx] > HIST_BIN_MAX:
-                            print("Histogram: Have over " + str(HIST_BIN_MAX) + " items at index " + str(idx) + 
-                                  " on channel " + str(channel) + ": " + str(hist[idx]) + " for " + source + " vs " + master)
-                            print("   Using range of " + str(start_idx) + " to " + str(hist.size) + " [HIST_START_INDEX: " + str(HIST_START_INDEX) + "]")
-                            print("   Histogram: " + str(hist))
-                            #failures['image differences'] = True
-                            break
+                        found_mismatch = False
+                        for channel in range(0, 3):
+                            hist, _ = np.histogram(diff[:, :, channel], 256, (0, 255))
+
+                            start_idx = HIST_START_INDEX if HIST_START_INDEX < hist.size else 0
+                            for idx in range(start_idx, hist.size):
+                                if hist[idx] > HIST_BIN_MAX:
+                                    found_mismatch = True
+                                    print("Histogram: Have over " + str(HIST_BIN_MAX) + " items at index " + str(idx) +
+                                          " on channel " + str(channel) + ": " + str(hist[idx]) + " for " + source + " vs " + master)
+                                    print("   Using range of " + str(start_idx) + " to " + str(hist.size) + " [HIST_START_INDEX: " + str(HIST_START_INDEX) + "]")
+                                    print("   Histogram: " + str(hist))
+                                    break
+                            if found_mismatch:
+                                break
+
+                        if not found_mismatch:
+                            matching_images = True
+
+                if not matching_images:
+                    print("FAILURE: Failed to match images")
+                    #failures['image differences'] = True
             else:
                 print("Skipping image histogram comparison due to image dimensional differences: assuming success: " + source + " vs " + master)
                 print("    Image dimensions: (" + str(im_mas.shape) + ") vs (" + str(im_src.shape) + ")")
