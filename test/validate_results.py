@@ -226,9 +226,9 @@ def _extract_image(img, x_off, y_off, max_x, max_y):
     # Return same type of image
     dims = len(img.shape)
     if dims == 2:
-        return img[x_off:max_x, y_off:max_y]
+        return img[x_off:max_x+x_off, y_off:max_y+y_off]
 
-    return img[x_off:max_x, y_off:max_y, :]
+    return img[x_off:max_x+x_off, y_off:max_y+y_off, :]
 
 
 argc = len(sys.argv)
