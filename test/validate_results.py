@@ -215,7 +215,9 @@ def _extract_image(img, x_off, y_off, max_x, max_y):
         within the bounds of the image in any direction, the original image is returned.
     """
     # Return original if we can't fulfill the request for a dimension
+    print("Extract: params: " + str(img.shape) + str(x_off) + " " + str(y_off) + " " + str(max_x) + " " + str(max_y))
     if x_off + max_x >= img.shape[0] or y_off + max_y >= img.shape[1]:
+        print("Extract: Returning original")
         return img
 
     # Return same type of image
@@ -364,9 +366,12 @@ for one_end in file_endings:
                     for y_off in range(0, diff_y + 1):
                         # Get any subset of the images we need to check
                         if not diff_x == 0 or not diff_y == 0:
+                            print("Cropping images: ("+str(x_off)+", "+str(y_off)+") ("+str(size_x)+", "+str(size_y)+")")
                             check_mas = _extract_image(im_mas, x_off, y_off, size_x, size_y)
                             check_src = _extract_image(im_src, x_off, y_off, size_x, size_y)
+                            print("    crop result: "+str(check_mas.shape)+" "+str(check_src.shape))
                         else:
+                            print("Comparing original images")
                             check_mas = im_mas
                             check_src = im_src
 
@@ -375,6 +380,7 @@ for one_end in file_endings:
 
                         found_mismatch = False
                         for channel in range(0, 3):
+                            print("Working on channel "+str(channel))
                             hist, _ = np.histogram(diff[:, :, channel], 256, (0, 255))
 
                             start_idx = HIST_START_INDEX if HIST_START_INDEX < hist.size else 0
