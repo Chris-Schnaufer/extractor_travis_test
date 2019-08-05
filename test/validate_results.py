@@ -23,10 +23,10 @@ PERCENT_DIFF_ALLOWED = (5.0 / 100.0)
 # Calculate the starting histogram index value
 HIST_START_INDEX = int(math.ceil(256 * PERCENT_DIFF_ALLOWED))
 
-# Number elements in a bucket that are "OK". Any bucket value above this is considered failure
-# Note that for 3 channel images, a value of 100 means that about 33 pixels in any bin exceeding
-# this value would cause failure
-HIST_BIN_MAX = 100
+# Number elements in a bucket that are "OK". Any bucket value above this is considered failure.
+# This value is used with the total number of pixels to determine success. The value is the
+# decimal representation of the percent
+MAX_HISTOGRAM_DIFF_PCT = 0.03
 
 # Default maximum number of pixels difference in any image dimension
 MAX_ALLOWED_PIX_DIFF = 0
@@ -214,14 +214,25 @@ def _extract_image(img, x_off, y_off, max_x, max_y):
         The extracted portion of the image. If the requested extraction doesn't fit
         within the bounds of the image in any direction, the original image is returned.
     """
+    dims = len(img.shape)
+
     # Return original if we can't fulfill the request for a dimension
     print("Extract: params: " + str(img.shape) + " " + str(x_off) + " " + str(y_off) + " " + str(max_x) + " " + str(max_y))
-    if x_off + max_x > img.shape[0] or y_off + max_y > img.shape[1]:
-        print("Extract: Returning original, extract too big")
-        return img
     if max_x == img.shape[0] and max_y == img.shape[1]:
-        print("Extract: Returning original, exact match")
+        print("Extract:     Returning original, exact match")
         return img
+
+    # Check if we need to clip the image from the origin because it's inherently too large
+    if x_off + max_x > img.shape[0] or y_off + max_y > img.shape[1]:
+        x_start = 0 if x_off + max_x > img.shape[0] else x_off
+        y_start = 0 if y_off + max_y > img.shape[1] else y_off
+        x_end = x_start + max_x
+        y_end = y_start + max_y
+        print("Extract:     Returning original, clipped: " + str(x_start) + "," + str(y_start) + " " + str(x_end) + "," + str(y_end))
+        if dims == 2:
+            return img[x_start:x_end, y_start:y_end]
+        else:
+            return img[x_start:x_end, y_start:y_end, :]
 
     # Return same type of image
     dims = len(img.shape)
@@ -305,17 +316,17 @@ for one_end in file_endings:
         # Check file sizes
         master_size = os.path.getsize(comp_master)
         source_size = os.path.getsize(comp_source)
-        if master_size <= 0 and not source_size <= 0:
-            raise RuntimeError("Generated file is not empty like comparison file: " + source + " vs " + master)
-        if not master_size == 0:
-            diff = abs(master_size - source_size)
-            if not diff == 0 and float(diff)/float(master_size) > FILE_SIZE_MAX_DIFF_FRACTION:
-                print("File size difference exceeds allowance of " + str(FILE_SIZE_MAX_DIFF_FRACTION) + ": " + str(master_size) + " vs " +
-                      str(source_size) + " (old vs new) for files " + master + " and " + source)
-                raise RuntimeError("File size difference exceeds limit of " + str(FILE_SIZE_MAX_DIFF_FRACTION) + ": " + source + " vs " + master)
-        if master_size == 0 or source_size == 0:
-            print("Success compare empty files (" + one_end + "): " + source + " and " + master)
-            continue
+        if master_size <= 0:
+            if source_size <= 0:
+                print("Success compare empty files (" + one_end + "): " + source + " and " + master)
+                continue
+            else:
+                raise RuntimeError("Generated file is not empty like comparison file: " + source + " vs " + master)
+        diff = abs(master_size - source_size)
+        if not diff == 0 and float(diff)/float(master_size) > FILE_SIZE_MAX_DIFF_FRACTION:
+            print("File size difference exceeds allowance of " + str(FILE_SIZE_MAX_DIFF_FRACTION) + ": " + str(master_size) + " vs " +
+                  str(source_size) + " (old vs new) for files " + master + " and " + source)
+            raise RuntimeError("File size difference exceeds limit of " + str(FILE_SIZE_MAX_DIFF_FRACTION) + ": " + source + " vs " + master)
 
         # Check file types
         if not ext:
@@ -365,6 +376,7 @@ for one_end in file_endings:
             print("Image min dimensions: (" + str(size_x) + ", " + str(size_y) + ")")
             if diff_x <= 1 and diff_y <= 1:
                 matching_images = False
+                max_histogram_diff = int(size_x * size_y * MAX_HISTOGRAM_DIFF_PCT)
                 for x_off in range(0, diff_x + 1):
                     for y_off in range(0, diff_y + 1):
                         # Get any subset of the images we need to check
@@ -388,9 +400,9 @@ for one_end in file_endings:
 
                             start_idx = HIST_START_INDEX if HIST_START_INDEX < hist.size else 0
                             for idx in range(start_idx, hist.size):
-                                if hist[idx] > HIST_BIN_MAX:
+                                if hist[idx] > max_histogram_diff:
                                     found_mismatch = True
-                                    print("Histogram: Have over " + str(HIST_BIN_MAX) + " items at index " + str(idx) +
+                                    print("Histogram: Have over " + str(max_histogram_diff) + " items at index " + str(idx) +
                                           " on channel " + str(channel) + ": " + str(hist[idx]) + " for " + source + " vs " + master)
                                     print("   Using range of " + str(start_idx) + " to " + str(hist.size) + " [HIST_START_INDEX: " + str(HIST_START_INDEX) + "]")
                                     print("   Histogram: " + str(hist))
