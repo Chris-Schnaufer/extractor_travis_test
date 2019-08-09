@@ -72,15 +72,15 @@ def string_to_int(value):
     Return:
         The integer representation of the nummber. Fractions are truncated. Invalid values return None
     """
-    val = None
+    ival = None
 
     try:
-        val = float(value)
-        val = int(val)
+        ival = float(value)
+        ival = int(ival)
     except Exception:
         pass
 
-    return val
+    return ival
 
 def process_arg(arg):
     """Processes the argument string
@@ -116,9 +116,9 @@ def process_arg_parameter(arg_and_params):
 
             # Handle each argument
             if cmd == "pixdiff":
-                val = string_to_int(params[0])
-                if val >= 0:
-                    MAX_ALLOWED_PIX_DIFF = val
+                diff_val = string_to_int(params[0])
+                if diff_val >= 0:
+                    MAX_ALLOWED_PIX_DIFF = diff_val
                     return True
             elif cmd == "geotiffclip":
                 bounds = params[0].split(',')
@@ -136,8 +136,10 @@ def process_arg_parameter(arg_and_params):
                 limits_len = len(bounds)
                 if limits_len >= 1:
                     MAX_IMAGE_DIFF_PCT = float(limits[0]) / 100.0
+                    print("Max image diff: " + str(MAX_IMAGE_DIFF_PCT))
                 if limits_len >= 2:
                     MAX_IMAGE_SUM_DIFF_PCT = float(limits[1]) / 100.0
+                    print("Max image sum diff: " + str(MAX_IMAGE_SUM_DIFF_PCT))
 
     except Exception as ex:
         print("Caught exception processing argument with parameters: " + str(ex))
@@ -248,8 +250,7 @@ def _extract_image(img, x_off, y_off, max_x, max_y):
         print("Extract:     Returning original, clipped: " + str(x_start) + "," + str(y_start) + " " + str(x_end) + "," + str(y_end))
         if dims == 2:
             return img[x_start:x_end, y_start:y_end]
-        else:
-            return img[x_start:x_end, y_start:y_end, :]
+        return img[x_start:x_end, y_start:y_end, :]
 
     # Return same type of image
     dims = len(img.shape)
@@ -415,8 +416,8 @@ for one_end in file_endings:
                             # Check the normalized average pixel value
                             master_chan_avg = float(np.sum(check_mas[:, :, channel])) / total_pixels
                             source_chan_avg = float(np.sum(check_src[:, :, channel])) / total_pixels
-                            pct_master = master_channel / (master_channel + source_channel)
-                            pct_source = source_channel / (master_channel + source_channel)
+                            pct_master = master_chan_avg / (master_chan_avg + source_chan_avg)
+                            pct_source = source_chan_avg / (master_chan_avg + source_chan_avg)
                             if abs(pct_master - pct_source) >= MAX_IMAGE_DIFF_PCT:
                                 print("  Average pixel value differences exceed threshold")
                                 print("    Values: " + str(pct_master) + " - " + str(pct_source) + \
