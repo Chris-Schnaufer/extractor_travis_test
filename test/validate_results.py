@@ -31,6 +31,14 @@ MAX_HISTOGRAM_DIFF_PCT = 0.03
 # Default maximum number of pixels difference in any image dimension
 MAX_ALLOWED_PIX_DIFF = 0
 
+# Maximum allowed calculated differences between images (0.0 - 1.0)
+# For example, the max histogram value divided by the total number of pixels < MAX_IMAGE_DIFF_PCT
+MAX_IMAGE_DIFF_PCT = 0.001
+
+# Maximum allowed cumulative calculated differences between images (0.0 - 1.0)
+# For example, the sum of histogram values divided by the total number of pixels < MAX_IMAGE_SUM_DIFF_PCT
+MAX_IMAGE_SUM_DIFF_PCT = 0.04
+
 # Tiff Clipping Tuple: (min Y, max Y, min X, max X)
 TIFF_CLIP_TUPLE = None
 
@@ -93,6 +101,8 @@ def process_arg_parameter(arg_and_params):
     # We use if .. else instead of dictionary to keep evaluation time down and all the code in one place
     global MAX_ALLOWED_PIX_DIFF
     global TIFF_CLIP_TUPLE
+    global MAX_IMAGE_DIFF_PCT
+    global MAX_IMAGE_SUM_DIFF_PCT
 
     try:
         # Fix up argument and parameter
@@ -121,6 +131,13 @@ def process_arg_parameter(arg_and_params):
                     TIFF_CLIP_TUPLE = (min_y, max_y, min_x, max_x)
                     print("Clip Tuple: " + str(TIFF_CLIP_TUPLE))
                     return True
+            elif cmd == "bychannel":
+                limits = params[0].split(',')
+                limits_len = len(bounds)
+                if limits_len >= 1:
+                    MAX_IMAGE_DIFF_PCT = float(limits[0]) / 100.0
+                if limits_len >= 2:
+                    MAX_IMAGE_SUM_DIFF_PCT = float(limits[1]) / 100.0
 
     except Exception as ex:
         print("Caught exception processing argument with parameters: " + str(ex))
@@ -390,24 +407,56 @@ for one_end in file_endings:
                             check_mas = im_mas
                             check_src = im_src
 
-                        # calculate the differences between the images and check that
-                        diff = np.absolute(np.subtract(check_mas, check_src))
-
                         found_mismatch = False
+                        total_pixels = float(check_mas.shape[0] * check_mas.shape[1])
                         for channel in range(0, 3):
                             print("Working on channel "+str(channel))
-                            hist, _ = np.histogram(diff[:, :, channel], 256, (0, 255))
 
-                            start_idx = HIST_START_INDEX if HIST_START_INDEX < hist.size else 0
-                            for idx in range(start_idx, hist.size):
-                                if hist[idx] > max_histogram_diff:
-                                    found_mismatch = True
-                                    print("Histogram: Have over " + str(max_histogram_diff) + " items at index " + str(idx) +
-                                          " on channel " + str(channel) + ": " + str(hist[idx]) + " for " + source + " vs " + master)
-                                    print("   Using range of " + str(start_idx) + " to " + str(hist.size) + " [HIST_START_INDEX: " + str(HIST_START_INDEX) + "]")
-                                    print("   Histogram: " + str(hist))
-                                    break
-                            if found_mismatch:
+                            # Check the normalized average pixel value
+                            master_chan_avg = float(np.sum(check_mas[:, :, channel])) / total_pixels
+                            source_chan_avg = float(np.sum(check_src[:, :, channel])) / total_pixels
+                            pct_master = master_channel / (master_channel + source_channel)
+                            pct_source = source_channel / (master_channel + source_channel)
+                            if abs(pct_master - pct_source) >= MAX_IMAGE_DIFF_PCT:
+                                print("  Average pixel value differences exceed threshold")
+                                print("    Values: " + str(pct_master) + " - " + str(pct_source) + \
+                                                                    " >= " + str(MAX_IMAGE_DIFF_PCT))
+                                found_mismatch = True
+                                break
+
+                            # Check the normalized counts of pixel intensity
+                            master_hist, _ = np.histogram(check_mas[:, :, channel], 256, (0, 255))
+                            source_hist, _ = np.histogram(check_src[:, :, channel], 256, (0, 255))
+                            subsample_master = np.sum(master_hist[25:230])
+                            subsample_source = np.sum(source_hist[25:230])
+                            pct_master = float(subsample_master) / float(np.sum(master_hist))
+                            pct_source = float(subsample_source) / float(np.sum(source_hist))
+                            if abs(pct_master - pct_source) >= MAX_IMAGE_DIFF_PCT:
+                                print("  Differences between histograms of intensity exceeds threshold")
+                                print("    Values: " + str(pct_master) + " - " + str(pct_source) + \
+                                                                    " >= " + str(MAX_IMAGE_DIFF_PCT))
+                                found_mismatch = True
+                                break
+
+                            # Perform a maximum value of histogram difference comparison
+                            diff = np.absolute(np.subtract(master_hist, source_hist))
+                            maxval = 0
+                            for val in diff:
+                                maxval = max(maxval, val)
+                            if float(maxval) / total_pixels >= MAX_IMAGE_DIFF_PCT:
+                                found_mismatch = True
+                                print("  Pixel intensity difference maximum (by count) exceeds threshold")
+                                print("    Values: " + str(maxval) + " / " + str(total_pixels) + \
+                                                                    " >= " + str(MAX_IMAGE_DIFF_PCT))
+                                break
+
+                            # Check that the total histogram differences are within range
+                            total_diff = np.sum(diff)
+                            if float(total_diff) / total_pixels >= MAX_IMAGE_SUM_DIFF_PCT:
+                                found_mismatch = True
+                                print("  Pixel intensity difference sum total (by count) exceeds threshold")
+                                print("    Values: " + str(total_diff) + " / " + str(total_pixels) + \
+                                                                    " >= " + str(MAX_IMAGE_DIFF_PCT))
                                 break
 
                         if not found_mismatch:
