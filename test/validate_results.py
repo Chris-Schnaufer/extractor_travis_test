@@ -133,7 +133,7 @@ def process_arg_parameter(arg_and_params):
                     return True
             elif cmd == "bychannel":
                 limits = params[0].split(',')
-                limits_len = len(bounds)
+                limits_len = len(limits)
                 if limits_len >= 1:
                     MAX_IMAGE_DIFF_PCT = float(limits[0]) / 100.0
                     print("Max image diff: " + str(MAX_IMAGE_DIFF_PCT))
@@ -420,6 +420,7 @@ for one_end in file_endings:
                             pct_source = source_chan_avg / (master_chan_avg + source_chan_avg)
                             if abs(pct_master - pct_source) >= MAX_IMAGE_DIFF_PCT:
                                 print("  Average pixel value differences exceed threshold")
+                                print("    Avg: " + str(master_chan_avg) + " vs " + str(source_chan_avg))
                                 print("    Values: " + str(pct_master) + " - " + str(pct_source) + \
                                                                     " >= " + str(MAX_IMAGE_DIFF_PCT))
                                 found_mismatch = True
