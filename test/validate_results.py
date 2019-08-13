@@ -418,6 +418,7 @@ for one_end in file_endings:
                             source_chan_avg = float(np.sum(check_src[:, :, channel])) / total_pixels
                             pct_master = master_chan_avg / (master_chan_avg + source_chan_avg)
                             pct_source = source_chan_avg / (master_chan_avg + source_chan_avg)
+                            print("  Average pixel value difference: " + str(abs(pct_master - pct_source)))
                             if abs(pct_master - pct_source) >= MAX_IMAGE_DIFF_PCT:
                                 print("  Average pixel value differences exceed threshold")
                                 print("    Avg: " + str(master_chan_avg) + " vs " + str(source_chan_avg))
@@ -433,8 +434,9 @@ for one_end in file_endings:
                             subsample_source = np.sum(source_hist[25:230])
                             pct_master = float(subsample_master) / float(np.sum(master_hist))
                             pct_source = float(subsample_source) / float(np.sum(source_hist))
+                            print("  Percentage histogram intensity difference: " + str(abs(pct_master - pct_source)))
                             if abs(pct_master - pct_source) >= MAX_IMAGE_DIFF_PCT:
-                                print("  Differences between histograms of intensity exceeds threshold")
+                                print("  Percentage differences between histograms of intensity exceeds threshold")
                                 print("    Values: " + str(pct_master) + " - " + str(pct_source) + \
                                                                     " >= " + str(MAX_IMAGE_DIFF_PCT))
                                 found_mismatch = True
@@ -445,6 +447,7 @@ for one_end in file_endings:
                             maxval = 0
                             for val in diff:
                                 maxval = max(maxval, val)
+                            print("  Pixel intensity difference of maximum percent: " + str(float(maxval) / total_pixels))
                             if float(maxval) / total_pixels >= MAX_IMAGE_DIFF_PCT:
                                 found_mismatch = True
                                 print("  Pixel intensity difference maximum (by count) exceeds threshold")
@@ -454,6 +457,7 @@ for one_end in file_endings:
 
                             # Check that the total histogram differences are within range
                             total_diff = np.sum(diff)
+                            print("  Pixel intensity difference sum percent: " + str(total_diff))
                             if float(total_diff) / total_pixels >= MAX_IMAGE_SUM_DIFF_PCT:
                                 found_mismatch = True
                                 print("  Pixel intensity difference sum total (by count) exceeds threshold")
